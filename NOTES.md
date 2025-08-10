@@ -11,3 +11,6 @@ Manifest File needed to describe permissions
 
 Upload "dist" file when uploading.
 Anything in "public" is copied into dist
+
+To get Chrome API:
+npm install -D @types/chrome

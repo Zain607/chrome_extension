@@ -1,14 +1,31 @@
-import { useState } from 'react'
+
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
-function App() {
-  const [count, setCount] = useState(0)
+function App() { // Context of popup
+ 
+
+  const onclick = async () => {
+
+    let [tab] = await chrome.tabs.query({ active: true, currentWindow: true});
+    chrome.scripting.executeScript({ // Context of tab
+      target: { tabId: tab.id! },
+      func: () => { // When button is clicked
+
+
+        document.body.style.backgroundColor = "red";
+      
+      
+      }
+    });
+  
+  }
+
 
   return (
     <>
-      <div>
+      <div>s
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
@@ -18,8 +35,8 @@ function App() {
       </div>
       <h1>Vite + React</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={() => onclick()}>
+          Click me
         </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
