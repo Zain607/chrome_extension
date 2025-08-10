@@ -6,4 +6,4 @@ Contexts:
 2. Service Worker: Sits outside page - open other tabs
 3. Page Context i.e. webpage that is open - scraping page
 
-manifest file
+Manifest File needed to describe permissions
