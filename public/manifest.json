@@ -1,5 +1,17 @@
 {
     "manifest_version": 3,
     "name": "LinkedIn Scraper",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "action": {
+        "default_popup": "index.html"
+    },
+    "permissions": [
+        "scripting"
+    ],
+    "host_permissions": [
+        "https://*/*"
+    ],
+    "icons": {
+        "16": "icon32.png"
+    }
 }
