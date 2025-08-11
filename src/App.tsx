@@ -14,8 +14,8 @@ function App() { // Context of popup
       func: () => { // When button is clicked
 
 
-        document.body.style.backgroundColor = "red";
-      
+        const text = document.body.innerText;
+        alert(text);
       
       }
     });
