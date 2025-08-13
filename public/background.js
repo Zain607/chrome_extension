@@ -1,11 +1,6 @@
 // Service Worker file
 
-const urls = [
-    "https://www.google.co.uk/",
-    "https://www.bbc.co.uk/"
-];
-
-const processTabs = async () => {
+const processTabs = async (urls) => {
     await Promise.all( // Open each tab in parallel
         urls.map(url => chrome.tabs.create({ url, active: false }))
     );
@@ -13,6 +8,6 @@ const processTabs = async () => {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action == "processTabs"){
-        processTabs();
+        processTabs(message.data);
     }
 })

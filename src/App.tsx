@@ -1,12 +1,17 @@
-
+import { useState } from "react"; // Used for taking user input
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() { // Context of popup
  
+  const [userInput, setUserInput] = useState("");
+
   const onClick = () => {
-    chrome.runtime.sendMessage({ action: "processTabs"});
+    chrome.runtime.sendMessage({ 
+      action: "processTabs",
+      data: [userInput],
+    });
   };
 
 
@@ -21,10 +26,16 @@ function App() { // Context of popup
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Vite + React</h1>
+      <h1>Open URL</h1>
+      <input
+        type="text"
+        value={userInput}
+        onChange={(e) => setUserInput(e.target.value)}
+        placeholder="Enter a URL to open..."
+      />
       <div className="card">
         <button onClick={() => onClick()}>
-          Click me
+          Open
         </button>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
