@@ -29,31 +29,52 @@ const scrapeTabs = async (tabIDs) => {
         chrome.scripting.executeScript(
           {
             target: { tabId: id },
-            func: () => ({
-              url: window.location.href,
-              html: document.documentElement.outerHTML
-            })
+            func: () => {
+              const nameElement = document.querySelector("h1.OxxOqDfGIbFPnYNBINkSMUTiprsgGqfeMDPfA.inline.t-24.v-align-middle.break-words");
+              const name = nameElement ? nameElement.innerText : "";
+              return {
+                url: window.location.href,
+                name: name
+              };
+            }
           },
           (results) => {
-            const { url, html } = results[0].result;
-            resolve({ url, html, id });
+            const { url, name } = results[0].result;
+            resolve({ url, name, id });
           }
         );
       })
     )
   );
-
+  console.log(info);
   return info; // array of { url, html, id }
 };
 
+const closeTabs = async(tabIDs) => { // Close tabs once finished
+  chrome.tabs.remove(tabIDs, () => {
+    if (chrome.runtime.lastError) {
+      console.error(chrome.runtime.lastError.message);
+    } else {
+      console.log("Closed all tabs");
+    }
+  });
+};
 
 // Listen to message from popup to perform tasks
-chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action == "processTabs"){
-        const urls = message.data;
-        const tab = await openTabs(urls);
-        const scraped = await scrapeTabs(tab);
-        sendResponse(scraped)
+      (async() => {
+        try{
+          const urls = message.data;
+          const tabs = await openTabs(urls);
+          const scraped = await scrapeTabs(tabs);
+          await closeTabs(tabs)
+          sendResponse(scraped);
+        } catch (err) {
+        console.log(err);
+        sendResponse({error: err.message });
+        }
+      })();
+      return true;
     };
-    return true;
 })

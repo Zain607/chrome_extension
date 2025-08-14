@@ -5,19 +5,22 @@ import './App.css'
 
 function App() { // Context of popup
  
-  const [userInput, setUserInput] = useState("");
-  const [scrapedHTML, setScrapedHTML] = useState<string[]>([])
+  
+  const [scrapedHTML, setScrapedHTML] = useState<string[]>([]);
 
-  const onClick = () => {
-    chrome.runtime.sendMessage({ 
+  const onClick = async () => {
+    await chrome.runtime.sendMessage({ 
       action: "processTabs",
-      data: [userInput],
+      data: [
+        "https://www.linkedin.com/in/zain-n-112a361a8/",
+        "https://www.linkedin.com/in/timcampbellmbe/"
+      ],
     }, response => {
       if (chrome.runtime.lastError){
         console.error(chrome.runtime.lastError.message);
         return;
       } else{
-        const array = response.map((item: {html: string}) => item.html);
+        const array = response.map((item: {name: string}) => item.name);
         setScrapedHTML(array)
       }
     });
@@ -36,19 +39,12 @@ function App() { // Context of popup
         </a>
       </div>
       <h1>Open URL</h1>
-      <label htmlFor="links">Select a link:</label>
-      <select id="links" value={userInput} onChange={e => setUserInput(e.target.value)}>
-        <option value="">--Select--</option>
-        <option value="https://www.google.co.uk/">Google</option>
-        <option value="https://www.mortsandmore.com/">Morts&More</option>
-        <option value="https://www.bbc.co.uk/">BBC</option>
-      </select>
       <div className="card">
         <button onClick={() => onClick()}>
           Open
         </button>
         <p>
-          {scrapedHTML}
+          {scrapedHTML.join("\n")}
         </p>
         <p>
           Edit <code>src/App.tsx</code> and save to test HMR
