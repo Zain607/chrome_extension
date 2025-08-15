@@ -22,7 +22,7 @@ const openTabs = async (urls) => { // Open new tabs given array of URLs input
 };
 
 const scrapeTabs = async (tabIDs) => {
-  console.log("tabIDs: ", tabIDs);
+  // console.log("tabIDs: ", tabIDs);
   const info = await Promise.all(
     tabIDs.map(id => 
       new Promise((resolve) => {
@@ -30,17 +30,37 @@ const scrapeTabs = async (tabIDs) => {
           {
             target: { tabId: id },
             func: () => {
-              const nameElement = document.querySelector("h1.OxxOqDfGIbFPnYNBINkSMUTiprsgGqfeMDPfA.inline.t-24.v-align-middle.break-words");
-              const name = nameElement ? nameElement.innerText : "";
+              const getText = (doc, selector) => {
+                const element = doc.querySelector(selector);
+                return element ? element.innerText : "";
+              }
+              /*
+              function getElementByXPath(path) {
+                return document.evaluate(
+                    path,
+                    document,
+                    null,
+                    XPathResult.FIRST_ORDERED_NODE_TYPE,
+                    null
+                ).singleNodeValue;
+              }
+              */
+              // const main = document.querySelector("main.sHUEuypAIrQQkLeMMRyjocBGdDtktBssQaExY")?.innerText;
+              
               return {
                 url: window.location.href,
-                name: name
+                name: getText(document, "h1.RZUjpoRzdSTcfspnoKCbxuvCHpKKszYYg.inline.t-24.v-align-middle.break-words"),
+                headline: getText(document, "div.text-body-medium.break-words"),
+                location: getText(document, "span.text-body-small.inline.t-black--light.break-words"),
+                // main: main ? main.innerText : "Not Found"
               };
             }
           },
           (results) => {
-            const { url, name } = results[0].result;
-            resolve({ url, name, id });
+            console.log("Results: ");
+            console.log(results);
+            const {  name, headline, location, main } = results[0].result;
+            resolve({ name, headline, location, main, id });
           }
         );
       })
@@ -55,7 +75,7 @@ const closeTabs = async(tabIDs) => { // Close tabs once finished
     if (chrome.runtime.lastError) {
       console.error(chrome.runtime.lastError.message);
     } else {
-      console.log("Closed all tabs");
+      // console.log("Closed all tabs");
     }
   });
 };

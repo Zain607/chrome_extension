@@ -6,25 +6,40 @@ import './App.css'
 function App() { // Context of popup
  
   
-  const [scrapedHTML, setScrapedHTML] = useState<string[]>([]);
+  const [Scraped, setScraped] = useState<string[]>([]);
+  const [Links, setLinks] = useState<string[]>([]);
 
-  const onClick = async () => {
+  const getLinks = async () => {
+    // Retrieve MongoDB records via Make.com webhook
+    const urls = await fetch("https://hook.eu2.make.com/ugu82mo26r9yq1wehoeybpss3gnr5jgf", { method: "GET" });
+    const response  = await urls.text();
+    const links = JSON.parse(response);
+    type linkItem = { link: string }; // Introduce to fix typing in links.map below
+    const parsed = links.map((link: linkItem) => link.link);
+    setLinks(parsed);
+  }
+
+
+  const scrape = async () => {
+    // Scrape fetched URLs saved in "Links" state
     await chrome.runtime.sendMessage({ 
       action: "processTabs",
-      data: [
-        "https://www.linkedin.com/in/zain-n-112a361a8/",
-        "https://www.linkedin.com/in/timcampbellmbe/"
-      ],
+      data: Links,
     }, response => {
       if (chrome.runtime.lastError){
         console.error(chrome.runtime.lastError.message);
         return;
       } else{
-        const array = response.map((item: {name: string}) => item.name);
-        setScrapedHTML(array)
+        console.log(response);
+        setScraped(response)
       }
     });
   };
+
+  const pushToDB = async () => {
+    // Push Scraped (array of JSONs) to MongoDB via make
+    
+  }
 
 
 
@@ -39,20 +54,22 @@ function App() { // Context of popup
         </a>
       </div>
       <h1>Open URL</h1>
-      <div className="card">
-        <button onClick={() => onClick()}>
-          Open
+      <div className="link_retrieval">
+        <button onClick={() => getLinks()}>
+          Get Links
         </button>
         <p>
-          {scrapedHTML.join("\n")}
-        </p>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
+          Links: {JSON.stringify(Links, null, 2)}
         </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <div className="scraping">
+        <button onClick={() => scrape()}>
+          Scrape Links
+        </button>
+        <p>
+          Scraped: {JSON.stringify(Scraped, null, 2)}
+        </p>
+      </div>
     </>
   )
 }
