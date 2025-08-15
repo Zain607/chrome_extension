@@ -8,6 +8,7 @@ function App() { // Context of popup
   
   const [Scraped, setScraped] = useState<string[]>([]);
   const [Links, setLinks] = useState<string[]>([]);
+  const [Accept, setAccept] = useState("");
 
   const getLinks = async () => {
     // Retrieve MongoDB records via Make.com webhook
@@ -38,7 +39,10 @@ function App() { // Context of popup
 
   const pushToDB = async () => {
     // Push Scraped (array of JSONs) to MongoDB via make
-    
+    const data = {"items": Scraped};
+    const response = await fetch("https://hook.eu2.make.com/3pa2xijpax9y9vy8fpd71uc79k1t4cpg", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const text = await response.text();
+    setAccept(text);
   }
 
 
@@ -69,6 +73,10 @@ function App() { // Context of popup
         <p>
           Scraped: {JSON.stringify(Scraped, null, 2)}
         </p>
+      </div>
+      <div className="pushing">
+        <button onClick={() => pushToDB()}>Push scraped data to Database</button>
+        <p>{Accept}</p>
       </div>
     </>
   )

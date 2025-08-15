@@ -1,12 +1,13 @@
 // Service Worker file
 
-const openTabs = async (urls) => { // Open new tabs given array of URLs input
+const openTabs = async (links) => { // Open new tabs given array of URLs input
     // Input array of URLs
     // Output?
+  // console.log(links);
   const tabs = await Promise.all(
-    urls.map(url =>
+    links.map(link =>
       new Promise((resolve) => {
-        chrome.tabs.create({ url, active: false }, (tab) => {
+        chrome.tabs.create({ url: link, active: false }, (tab) => {
           const listener = (tabId, changeInfo) => {
             if (tabId === tab.id && changeInfo.status === "complete") {
               chrome.tabs.onUpdated.removeListener(listener);
@@ -48,7 +49,7 @@ const scrapeTabs = async (tabIDs) => {
               // const main = document.querySelector("main.sHUEuypAIrQQkLeMMRyjocBGdDtktBssQaExY")?.innerText;
               
               return {
-                url: window.location.href,
+                link: window.location.href,
                 name: getText(document, "h1.RZUjpoRzdSTcfspnoKCbxuvCHpKKszYYg.inline.t-24.v-align-middle.break-words"),
                 headline: getText(document, "div.text-body-medium.break-words"),
                 location: getText(document, "span.text-body-small.inline.t-black--light.break-words"),
@@ -59,8 +60,8 @@ const scrapeTabs = async (tabIDs) => {
           (results) => {
             console.log("Results: ");
             console.log(results);
-            const {  name, headline, location, main } = results[0].result;
-            resolve({ name, headline, location, main, id });
+            const {  link, name, headline, location, main } = results[0].result;
+            resolve({ link, name, headline, location, main, id });
           }
         );
       })
@@ -86,6 +87,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       (async() => {
         try{
           const urls = message.data;
+          console.log(urls);
           const tabs = await openTabs(urls);
           const scraped = await scrapeTabs(tabs);
           await closeTabs(tabs)
