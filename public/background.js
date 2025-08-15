@@ -87,7 +87,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       (async() => {
         try{
           const urls = message.data;
-          console.log(urls);
+          // console.log(urls);
           const tabs = await openTabs(urls);
           const scraped = await scrapeTabs(tabs);
           await closeTabs(tabs)

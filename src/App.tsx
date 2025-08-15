@@ -4,42 +4,40 @@ import viteLogo from '/vite.svg'
 import './App.css'
 
 function App() { // Context of popup
- 
-  
-  const [Scraped, setScraped] = useState<string[]>([]);
-  const [Links, setLinks] = useState<string[]>([]);
-  const [Accept, setAccept] = useState("");
+  const [Accept, setAccept] = useState("Accepted");
 
   const getLinks = async () => {
     // Retrieve MongoDB records via Make.com webhook
+    setAccept("");
     const urls = await fetch("https://hook.eu2.make.com/ugu82mo26r9yq1wehoeybpss3gnr5jgf", { method: "GET" });
     const response  = await urls.text();
     const links = JSON.parse(response);
     type linkItem = { link: string }; // Introduce to fix typing in links.map below
     const parsed = links.map((link: linkItem) => link.link);
-    setLinks(parsed);
+    return parsed
   }
 
 
-  const scrape = async () => {
-    // Scrape fetched URLs saved in "Links" state
-    await chrome.runtime.sendMessage({ 
-      action: "processTabs",
-      data: Links,
-    }, response => {
-      if (chrome.runtime.lastError){
-        console.error(chrome.runtime.lastError.message);
-        return;
-      } else{
-        console.log(response);
-        setScraped(response)
-      }
+  const scrape = (parsed: string[]): Promise<any[]> => {
+    return new Promise((resolve, reject) => {
+      chrome.runtime.sendMessage(
+        { action: "processTabs", data: parsed },
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error(chrome.runtime.lastError.message);
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve(response);
+          }
+        }
+      );
     });
   };
 
-  const pushToDB = async () => {
+
+  const pushToDB = async (scraped: string[]) => {
     // Push Scraped (array of JSONs) to MongoDB via make
-    const data = {"items": Scraped};
+    const data = {"items": scraped};
     const response = await fetch("https://hook.eu2.make.com/3pa2xijpax9y9vy8fpd71uc79k1t4cpg", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
     const text = await response.text();
     setAccept(text);
@@ -58,25 +56,17 @@ function App() { // Context of popup
         </a>
       </div>
       <h1>Open URL</h1>
-      <div className="link_retrieval">
-        <button onClick={() => getLinks()}>
-          Get Links
-        </button>
-        <p>
-          Links: {JSON.stringify(Links, null, 2)}
-        </p>
-      </div>
       <div className="scraping">
-        <button onClick={() => scrape()}>
-          Scrape Links
+        <button 
+          onClick={async () => {
+            const links = await getLinks();
+            const data = await scrape(links);
+            await pushToDB(data);
+          }}
+          disabled={Accept === ""}
+        >
+          {Accept === "" ? "Running..." : "Scrape and update profiles"}
         </button>
-        <p>
-          Scraped: {JSON.stringify(Scraped, null, 2)}
-        </p>
-      </div>
-      <div className="pushing">
-        <button onClick={() => pushToDB()}>Push scraped data to Database</button>
-        <p>{Accept}</p>
       </div>
     </>
   )
