@@ -5,6 +5,7 @@ import './App.css'
 
 function App() { // Context of popup
   const [Accept, setAccept] = useState("Accepted");
+  const [Scraped, setScraped] = useState("Inactive");
 
   const getLinks = async () => {
     // Retrieve MongoDB records via Make.com webhook
@@ -27,6 +28,7 @@ function App() { // Context of popup
             console.error(chrome.runtime.lastError.message);
             reject(chrome.runtime.lastError);
           } else {
+            setAccept("Accepted");
             resolve(response);
           }
         }
@@ -35,19 +37,79 @@ function App() { // Context of popup
   };
 
 
-  const pushToDB = async (scraped: string[]) => {
+  /*const pushToDB = async (scraped: string[]) => {
     // Push Scraped (array of JSONs) to MongoDB via make
     const data = {"items": scraped};
-    const response = await fetch("https://hook.eu2.make.com/3pa2xijpax9y9vy8fpd71uc79k1t4cpg", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const response = await fetch(
+      "https://hook.eu2.make.com/3pa2xijpax9y9vy8fpd71uc79k1t4cpg", 
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
+    });
     const text = await response.text();
     setAccept(text);
+  }*/
+
+  const scrapeLeads = async() => {
+    // Return array of leads string[]
+    setScraped("Active");
+    let leads: string[] = [];
+    let [tab] = await chrome.tabs.query({ active: true });
+    
+    const results = await chrome.scripting.executeScript({
+      target: {tabId: tab.id!},
+      func: () => {
+        // Get the entire HTML content as text
+        const htmlText = document.documentElement.outerHTML;
+        
+        // Regex pattern to find LinkedIn profile URLs
+        // This pattern specifically matches https://www.linkedin.com/in/{profile-id}/
+        const linkedInProfileRegex = /https:\/\/www\.linkedin\.com\/in\/[^\/\?\s<"]+/g;
+
+        
+        // Find all matches in the HTML text
+        const matches = htmlText.match(linkedInProfileRegex);
+        
+        // Log what we found
+        console.log('Raw matches:', matches);
+        
+        // Remove duplicates and return unique URLs
+        const uniqueUrls = matches ? [...new Set(matches)] : [];
+        console.log('Unique URLs found:', uniqueUrls);
+        
+        return uniqueUrls;
+      }
+    });
+    
+    // Extract the results from the executed script
+    if (results && results[0] && results[0].result) {
+      leads = results[0].result;
+    }
+    
+    return leads;
   }
+  const uploadLeads = async(links: string[]) => {
+    // Upload array of leads to MongoDB via Make.
+    const endpoint = "https://hook.us1.make.com/4e9915dpiack58vd7mqc5rfv2y8ahjsw";
+    const data = {
+      "items": links
+    };
+    const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+    console.log(response);
+    setScraped("Inactive");
+    }
+
+  
 
 
+// Next we qualify leads with OpenAI prompting via Make
+// Then we update profiles by scraping a LinkedIn page and adding links to MongoDB via Make
 
   return (
     <>
-      <div>s
+      <div>
         <a href="https://vite.dev" target="_blank">
           <img src={viteLogo} className="logo" alt="Vite logo" />
         </a>
@@ -55,13 +117,23 @@ function App() { // Context of popup
           <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>Open URL</h1>
+      <h1>LinkedIn Lead Gen</h1>
+      <div className="lead_gen">
+        <button
+          onClick={async () => {
+            const leads = await scrapeLeads();
+            await uploadLeads(leads);
+          }}
+          disabled={Scraped != "Inactive"}
+        >
+          {Scraped === "Active" ? "Running..." : "Find Profiles..."}
+        </button>
+      </div>
       <div className="scraping">
         <button 
           onClick={async () => {
             const links = await getLinks();
-            const data = await scrape(links);
-            await pushToDB(data);
+            await scrape(links);
           }}
           disabled={Accept === ""}
         >

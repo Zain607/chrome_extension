@@ -49,8 +49,8 @@ const scrapeTabs = async (tabIDs) => {
               // const main = document.querySelector("main.sHUEuypAIrQQkLeMMRyjocBGdDtktBssQaExY")?.innerText;
               
               return {
-                link: window.location.href,
-                name: getText(document, "h1.RZUjpoRzdSTcfspnoKCbxuvCHpKKszYYg.inline.t-24.v-align-middle.break-words"),
+                link: window.location.href.replace(/\/$/, ""),
+                name: getText(document, "h1"),
                 headline: getText(document, "div.text-body-medium.break-words"),
                 location: getText(document, "span.text-body-small.inline.t-black--light.break-words"),
                 // main: main ? main.innerText : "Not Found"
@@ -60,8 +60,8 @@ const scrapeTabs = async (tabIDs) => {
           (results) => {
             console.log("Results: ");
             console.log(results);
-            const {  link, name, headline, location, main } = results[0].result;
-            resolve({ link, name, headline, location, main, id });
+            const {  link, name, headline, location } = results[0].result;
+            resolve({ link, name, headline, location, id });
           }
         );
       })
@@ -81,6 +81,19 @@ const closeTabs = async(tabIDs) => { // Close tabs once finished
   });
 };
 
+  const pushToDB = async (scraped) => { // scraped is an array of JSONs to make.com
+    // Push Scraped (array of JSONs) to MongoDB via make
+    const data = {"items": scraped};
+    const response = await fetch(
+      "https://hook.eu2.make.com/3pa2xijpax9y9vy8fpd71uc79k1t4cpg", 
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
+    });
+    const text = await response.text();
+    console.log("API to Make sent to push scraped Leads to DB");
+    console.log(text);
+    return text;
+  }
+
 // Listen to message from popup to perform tasks
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action == "processTabs"){
@@ -90,7 +103,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           // console.log(urls);
           const tabs = await openTabs(urls);
           const scraped = await scrapeTabs(tabs);
-          await closeTabs(tabs)
+          
+          await closeTabs(tabs);
+          await pushToDB(scraped);
           sendResponse(scraped);
         } catch (err) {
         console.log(err);
