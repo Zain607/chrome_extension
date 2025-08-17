@@ -1,6 +1,5 @@
 import { useState } from "react"; // Used for taking user input
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import mortsLogo from '/morts_more.jpeg'
 import './App.css'
 
 function App() { // Context of popup
@@ -113,38 +112,63 @@ function App() { // Context of popup
   return (
     <>
       <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
+        <a href="https://www.mortsandmore.com/" target="_blank">
+          <img src={mortsLogo} className="logo react" alt="React logo" />
         </a>
       </div>
-      <h1>LinkedIn Lead Gen</h1>
-      <div className="lead_gen">
+      <h3>Lead Generation</h3>
+
+      {/* Container for side-by-side buttons */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
         <button
+          style={{
+            flex: 1,                   // takes up half (or proportionally) of the container
+            backgroundColor: "transparent",
+            color: "#666",
+            border: "0px solid #ccc",
+            borderRadius: "4px",
+            padding: "15px",           // bigger button
+            fontSize: "16px",          // larger text
+            cursor: "pointer",
+            transition: "color 0.2s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = "#000"}
+          onMouseLeave={e => e.currentTarget.style.color = "#666"}
           onClick={async () => {
             const leads = await scrapeLeads();
             await uploadLeads(leads);
           }}
-          disabled={Scraped != "Inactive"}
+          disabled={Scraped !== "Inactive"}
         >
-          {Scraped === "Active" ? "Running..." : "Find Profiles..."}
+          {Scraped === "Active" ? "Running..." : "Find new profiles"}
         </button>
-      </div>
-      <div className="scraping">
-        <button 
+
+        <button
+          style={{
+            flex: 1,                   // takes up the other half
+            backgroundColor: "transparent",
+            color: "#666",
+            border: "0px solid #ccc",
+            borderRadius: "4px",
+            padding: "15px",
+            fontSize: "16px",
+            cursor: "pointer",
+            transition: "color 0.2s",
+          }}
+          onMouseEnter={e => e.currentTarget.style.color = "#000"}
+          onMouseLeave={e => e.currentTarget.style.color = "#666"}
           onClick={async () => {
             const links = await getLinks();
             await scrape(links);
           }}
           disabled={Accept === ""}
         >
-          {Accept === "" ? "Running..." : "Scrape and update profiles"}
+          {Accept === "" ? "Running..." : "Analyse existing profiles"}
         </button>
       </div>
     </>
-  )
+  );
+
 }
 
 export default App
