@@ -88,16 +88,19 @@ function App() { // Context of popup
   }
   const uploadLeads = async(links: string[]) => {
     // Upload array of leads to MongoDB via Make.
-    const endpoint = "https://hook.us1.make.com/4e9915dpiack58vd7mqc5rfv2y8ahjsw";
+    // Convert links into {link, name, headline, location}
+    const conv = links.map(link => ({"link": link}))
+    const endpoint = "https://hook.eu2.make.com/3pa2xijpax9y9vy8fpd71uc79k1t4cpg";
     const data = {
-      "items": links
+      "items": conv
     };
     const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data)
       });
-    console.log(response);
+    const tmp = await response.text()
+    console.log(tmp);
     setScraped("Inactive");
     }
 
