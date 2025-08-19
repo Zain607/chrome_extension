@@ -47,12 +47,20 @@ const scrapeTabs = async (tabIDs) => {
               }
               */
               // const main = document.querySelector("main.sHUEuypAIrQQkLeMMRyjocBGdDtktBssQaExY")?.innerText;
+              const name1 = getText(document, "h1");
+              const headline1 = getText(document, "div.text-body-medium.break-words");
+              const location1 = getText(document, "span.text-body-small.inline.t-black--light.break-words");
               
               return {
                 link: window.location.href.replace(/\/$/, ""),
-                name: getText(document, "h1"),
-                headline: getText(document, "div.text-body-medium.break-words"),
-                location: getText(document, "span.text-body-small.inline.t-black--light.break-words"),
+                name: name1,
+                headline: headline1,
+                location: location1,
+                full: `
+Name: ${name1}
+Location: ${location1}
+Headline: ${headline1}
+                `
                 // main: main ? main.innerText : "Not Found"
               };
             }
@@ -60,8 +68,8 @@ const scrapeTabs = async (tabIDs) => {
           (results) => {
             console.log("Results: ");
             console.log(results);
-            const {  link, name, headline, location } = results[0].result;
-            resolve({ link, name, headline, location, id });
+            const {  link, name, headline, location, full } = results[0].result;
+            resolve({ link, name, headline, location, full, id });
           }
         );
       })

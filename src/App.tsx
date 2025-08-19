@@ -87,7 +87,7 @@ function App() { // Context of popup
   }
   const uploadLeads = async(links: string[]) => {
     // Upload array of leads to MongoDB via Make.
-    // Convert links into {link, name, headline, location}
+    // Convert links into {link, name, headline, location, full}
     const conv = links.map(link => ({"link": link}))
     const endpoint = "https://hook.eu2.make.com/3pa2xijpax9y9vy8fpd71uc79k1t4cpg";
     const data = {
