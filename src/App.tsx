@@ -122,15 +122,15 @@ function App() { // Context of popup
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
         <button
           style={{
-            flex: 1,                   // takes up half (or proportionally) of the container
-            backgroundColor: "transparent",
-            color: "#666",
-            border: "0px solid #ccc",
+            flex: 1, // takes up the other half
+            backgroundColor: "#f0f0f0",   // light neutral background
+            color: "#222",                // dark text for readability
+            border: "1px solid #ccc",
             borderRadius: "4px",
-            padding: "15px",           // bigger button
-            fontSize: "16px",          // larger text
+            padding: "15px",
+            fontSize: "16px",
             cursor: "pointer",
-            transition: "color 0.2s",
+            transition: "background-color 0.2s, color 0.2s",
           }}
           onMouseEnter={e => e.currentTarget.style.color = "#000"}
           onMouseLeave={e => e.currentTarget.style.color = "#666"}
@@ -145,16 +145,17 @@ function App() { // Context of popup
 
         <button
           style={{
-            flex: 1,                   // takes up the other half
-            backgroundColor: "transparent",
-            color: "#666",
-            border: "0px solid #ccc",
+            flex: 1, // takes up the other half
+            backgroundColor: "#f0f0f0",   // light neutral background
+            color: "#222",                // dark text for readability
+            border: "1px solid #ccc",
             borderRadius: "4px",
             padding: "15px",
             fontSize: "16px",
             cursor: "pointer",
-            transition: "color 0.2s",
+            transition: "background-color 0.2s, color 0.2s",
           }}
+
           onMouseEnter={e => e.currentTarget.style.color = "#000"}
           onMouseLeave={e => e.currentTarget.style.color = "#666"}
           onClick={async () => {
